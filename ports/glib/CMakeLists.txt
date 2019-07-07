@@ -106,29 +106,102 @@ endif()
 include_directories(${CMAKE_BINARY_DIR}/config ${CMAKE_BINARY_DIR}/config/glib ${CMAKE_BINARY_DIR}/config/gio ${CMAKE_BINARY_DIR}/config/gmodule)
 include_directories(. glib)
 
-# This macro purposely doesn't find nodes with sources that have additional properties set
-# Most of such files in glib are PCRE sources which we don't use anyway
-macro(extract_vcproj_sources VC_PROJECT OUT_VAR)
-    file(READ ${VC_PROJECT} ${VC_PROJECT}-CONTENTS)
-    STRING(REPLACE "\n" ";" ${VC_PROJECT}-CONTENTS "${${VC_PROJECT}-CONTENTS}") # split by lines
-    foreach(LINE ${${VC_PROJECT}-CONTENTS})
-        if(LINE MATCHES "<ClCompile Include=\\\".*\\\" />")
-            string(REPLACE "<ClCompile Include=\"..\\..\\..\\" "" LINE ${LINE})
-            string(REPLACE "\" />" "" LINE ${LINE})
-            string(STRIP ${LINE} LINE)
-            file(TO_CMAKE_PATH ${LINE} LINE)
-            list(APPEND ${OUT_VAR} ${LINE})
-        endif()
-    endforeach()
-endmacro()
-
 # main module
-extract_vcproj_sources(win32/vs14/glib.vcxproj GLIB_SOURCES)
-list(APPEND GLIB_SOURCES glib/libcharset/localcharset.c) # modified internal version with prefixed symbols
-if(NOT WIN32)
-    list(FILTER GLIB_SOURCES EXCLUDE REGEX "win32.c\$|win32-helper.c\$")
-    list(APPEND GLIB_SOURCES "glib/gthread-posix.c" "glib/giounix.c" "glib/gspawn.c" "glib/glib-unix.c")
-endif()
+set(GLIB_SOURCES
+    ./glib/deprecated/gallocator.c
+    ./glib/deprecated/gcache.c
+    ./glib/deprecated/gcompletion.c
+    ./glib/deprecated/grel.c
+    ./glib/deprecated/gthread-deprecated.c
+    ./glib/docs.c
+    ./glib/garray.c
+    ./glib/gasyncqueue.c
+    ./glib/gatomic.c
+    ./glib/gbacktrace.c
+    ./glib/gbase64.c
+    ./glib/gbitlock.c
+    ./glib/gbookmarkfile.c
+    ./glib/gbytes.c
+    ./glib/gcharset.c
+    ./glib/gchecksum.c
+    ./glib/gconvert.c
+    ./glib/gdataset.c
+    ./glib/gdate.c
+    ./glib/gdatetime.c
+    ./glib/gdir.c
+    ./glib/genviron.c
+    ./glib/gerror.c
+    ./glib/gfileutils.c
+    ./glib/ggettext.c
+    ./glib/ghash.c
+    ./glib/ghmac.c
+    ./glib/ghook.c
+    ./glib/ghostutils.c
+    ./glib/giochannel.c
+    ./glib/giowin32.c
+    ./glib/gkeyfile.c
+    ./glib/glib-init.c
+    ./glib/glib-private.c
+    ./glib/glist.c
+    ./glib/gmain.c
+    ./glib/gmappedfile.c
+    ./glib/gmarkup.c
+    ./glib/gmem.c
+    ./glib/gmessages.c
+    ./glib/gnode.c
+    ./glib/gnulib/asnprintf.c
+    ./glib/gnulib/printf-args.c
+    ./glib/gnulib/printf-parse.c
+    ./glib/gnulib/printf.c
+    ./glib/gnulib/vasnprintf.c
+    ./glib/goption.c
+    ./glib/gpattern.c
+    ./glib/gpoll.c
+    ./glib/gprimes.c
+    ./glib/gprintf.c
+    ./glib/gqsort.c
+    ./glib/gquark.c
+    ./glib/gqueue.c
+    ./glib/grand.c
+    ./glib/gregex.c
+    ./glib/gscanner.c
+    ./glib/gsequence.c
+    ./glib/gshell.c
+    ./glib/gslice.c
+    ./glib/gslist.c
+    ./glib/gspawn-win32.c
+    ./glib/gstdio.c
+    ./glib/gstrfuncs.c
+    ./glib/gstring.c
+    ./glib/gstringchunk.c
+    ./glib/gtestutils.c
+    ./glib/gthread-win32.c
+    ./glib/gthread.c
+    ./glib/gthreadpool.c
+    ./glib/gtimer.c
+    ./glib/gtimezone.c
+    ./glib/gtranslit.c
+    ./glib/gtrashstack.c
+    ./glib/gtree.c
+    ./glib/gunibreak.c
+    ./glib/gunicollate.c
+    ./glib/gunidecomp.c
+    ./glib/guniprop.c
+    ./glib/gurifuncs.c
+    ./glib/gutf8.c
+    ./glib/gutils.c
+    ./glib/guuid.c
+    ./glib/gvariant-core.c
+    ./glib/gvariant-parser.c
+    ./glib/gvariant-serialiser.c
+    ./glib/gvariant.c
+    ./glib/gvarianttype.c
+    ./glib/gvarianttypeinfo.c
+    ./glib/gversion.c
+    ./glib/gwakeup.c
+    ./glib/gwin32.c
+    ./glib/libcharset/localcharset.c
+)
 add_library(glib ${GLIB_SOURCES})
 target_compile_definitions(glib PRIVATE GLIB_COMPILATION G_LOG_DOMAIN="GLib" LIBDIR="")
 target_link_libraries(glib PRIVATE ${PCRE_LIBRARY} unofficial::iconv::libiconv unofficial::iconv::libcharset ${LIBINTL_LIBRARY})
@@ -162,7 +235,26 @@ target_include_directories(gthread PRIVATE ${LIBINTL_INCLUDE_DIR})
 list(APPEND GLIB_TARGETS gthread)
 
 # gobject
-extract_vcproj_sources(win32/vs14/gobject.vcxproj GOBJECT_SOURCES)
+set(GOBJECT_SOURCES
+    ./gobject/gatomicarray.c
+    ./gobject/gbinding.c
+    ./gobject/gboxed.c
+    ./gobject/gclosure.c
+    ./gobject/genums.c
+    ./gobject/gmarshal.c
+    ./gobject/gobject.c
+    ./gobject/gparam.c
+    ./gobject/gparamspecs.c
+    ./gobject/gsignal.c
+    ./gobject/gsourceclosure.c
+    ./gobject/gtype.c
+    ./gobject/gtypemodule.c
+    ./gobject/gtypeplugin.c
+    ./gobject/gvalue.c
+    ./gobject/gvaluearray.c
+    ./gobject/gvaluetransform.c
+    ./gobject/gvaluetypes.c
+)
 add_library(gobject ${GOBJECT_SOURCES})
 target_compile_definitions(gobject PRIVATE GOBJECT_COMPILATION G_LOG_DOMAIN="GLib-GObject")
 target_link_libraries(gobject PRIVATE gthread glib ${FFI_LIBRARY})
@@ -210,7 +302,208 @@ if(APPLE)
 endif()
 
 # gio
-extract_vcproj_sources(win32/vs14/gio.vcxproj GIO_SOURCES)
+set(GIO_SOURCES
+    ./gio/gappinfo.c
+    ./gio/gasynchelper.c
+    ./gio/gasyncinitable.c
+    ./gio/gasyncresult.c
+    ./gio/gbufferedinputstream.c
+    ./gio/gbufferedoutputstream.c
+    ./gio/gbytesicon.c
+    ./gio/gcancellable.c
+    ./gio/gcharsetconverter.c
+    ./gio/gcontextspecificgroup.c
+    ./gio/gconverter.c
+    ./gio/gconverterinputstream.c
+    ./gio/gconverteroutputstream.c
+    ./gio/gcredentials.c
+    ./gio/gdatagrambased.c
+    ./gio/gdatainputstream.c
+    ./gio/gdataoutputstream.c
+    ./gio/gdrive.c
+    ./gio/gdummyfile.c
+    ./gio/gdummyproxyresolver.c
+    ./gio/gdummytlsbackend.c
+    ./gio/gemblem.c
+    ./gio/gemblemedicon.c
+    ./gio/gfile.c
+    ./gio/gfileattribute.c
+    ./gio/gfileenumerator.c
+    ./gio/gfileicon.c
+    ./gio/gfileinfo.c
+    ./gio/gfileinputstream.c
+    ./gio/gfilemonitor.c
+    ./gio/gfilenamecompleter.c
+    ./gio/gfileoutputstream.c
+    ./gio/gfileiostream.c
+    ./gio/gfilterinputstream.c
+    ./gio/gfilteroutputstream.c
+    ./gio/gicon.c
+    ./gio/ginetaddress.c
+    ./gio/ginetaddressmask.c
+    ./gio/ginetsocketaddress.c
+    ./gio/ginitable.c
+    ./gio/ginputstream.c
+    ./gio/gioerror.c
+    ./gio/giomodule.c
+    ./gio/gioscheduler.c
+    ./gio/giostream.c
+    ./gio/gloadableicon.c
+    ./gio/gmount.c
+    ./gio/gmemoryinputstream.c
+    ./gio/gmemoryoutputstream.c
+    ./gio/gmountoperation.c
+    ./gio/gnativevolumemonitor.c
+    ./gio/gnativesocketaddress.c
+    ./gio/gnetworkaddress.c
+    ./gio/gnetworking.c
+    ./gio/gnetworkmonitor.c
+    ./gio/gnetworkmonitorbase.c
+    ./gio/gnetworkservice.c
+    ./gio/goutputstream.c
+    ./gio/gpermission.c
+    ./gio/gpollableinputstream.c
+    ./gio/gpollableoutputstream.c
+    ./gio/gpollableutils.c
+    ./gio/gpollfilemonitor.c
+    ./gio/gproxy.c
+    ./gio/gproxyaddress.c
+    ./gio/gproxyaddressenumerator.c
+    ./gio/gproxyresolver.c
+    ./gio/gresolver.c
+    ./gio/gresource.c
+    ./gio/gresourcefile.c
+    ./gio/gseekable.c
+    ./gio/gsimpleasyncresult.c
+    ./gio/gsimpleiostream.c
+    ./gio/gsimplepermission.c
+    ./gio/gsocket.c
+    ./gio/gsocketaddress.c
+    ./gio/gsocketaddressenumerator.c
+    ./gio/gsocketclient.c
+    ./gio/gsocketconnectable.c
+    ./gio/gsocketconnection.c
+    ./gio/gsocketcontrolmessage.c
+    ./gio/gsocketinputstream.c
+    ./gio/gsocketlistener.c
+    ./gio/gsocketoutputstream.c
+    ./gio/gsubprocesslauncher.c
+    ./gio/gsubprocess.c
+    ./gio/gsocketservice.c
+    ./gio/gsrvtarget.c
+    ./gio/gsimpleproxyresolver.c
+    ./gio/gtask.c
+    ./gio/gtcpconnection.c
+    ./gio/gtcpwrapperconnection.c
+    ./gio/gthreadedsocketservice.c
+    ./gio/gthemedicon.c
+    ./gio/gthreadedresolver.c
+    ./gio/gtlsbackend.c
+    ./gio/gtlscertificate.c
+    ./gio/gtlsclientconnection.c
+    ./gio/gtlsconnection.c
+    ./gio/gtlsdatabase.c
+    ./gio/gtlsfiledatabase.c
+    ./gio/gtlsinteraction.c
+    ./gio/gtlspassword.c
+    ./gio/gtlsserverconnection.c
+    ./gio/gdtlsconnection.c
+    ./gio/gdtlsclientconnection.c
+    ./gio/gdtlsserverconnection.c
+    ./gio/gunionvolumemonitor.c
+    ./gio/gvfs.c
+    ./gio/gvolume.c
+    ./gio/gvolumemonitor.c
+    ./gio/gzlibcompressor.c
+    ./gio/gzlibdecompressor.c
+    ./gio/gioenumtypes.c
+    ./gio/glistmodel.c
+    ./gio/gliststore.c
+    ./gio/gapplication.c
+    ./gio/gapplicationcommandline.c
+    ./gio/gapplicationimpl-dbus.c
+    ./gio/gactiongroup.c
+    ./gio/gactionmap.c
+    ./gio/gsimpleactiongroup.c
+    ./gio/gremoteactiongroup.c
+    ./gio/gactiongroupexporter.c
+    ./gio/gdbusactiongroup.c
+    ./gio/gaction.c
+    ./gio/gpropertyaction.c
+    ./gio/gsimpleaction.c
+    ./gio/gmenumodel.c
+    ./gio/gmenu.c
+    ./gio/gmenuexporter.c
+    ./gio/gdbusmenumodel.c
+    ./gio/gnotification.c
+    ./gio/gnotificationbackend.c
+    ./gio/gdbusutils.c
+    ./gio/gdbusaddress.c
+    ./gio/gdbusauthobserver.c
+    ./gio/gdbusauth.c
+    ./gio/gdbusauthmechanism.c
+    ./gio/gdbusauthmechanismanon.c
+    ./gio/gdbusauthmechanismexternal.c
+    ./gio/gdbusauthmechanismsha1.c
+    ./gio/gdbuserror.c
+    ./gio/gdbusconnection.c
+    ./gio/gdbusmessage.c
+    ./gio/gdbusnameowning.c
+    ./gio/gdbusnamewatching.c
+    ./gio/gdbusproxy.c
+    ./gio/gdbusprivate.c
+    ./gio/gdbusintrospection.c
+    ./gio/gdbusmethodinvocation.c
+    ./gio/gdbusserver.c
+    ./gio/gdbusinterface.c
+    ./gio/gdbusinterfaceskeleton.c
+    ./gio/gdbusobject.c
+    ./gio/gdbusobjectskeleton.c
+    ./gio/gdbusobjectproxy.c
+    ./gio/gdbusobjectmanager.c
+    ./gio/gdbusobjectmanagerclient.c
+    ./gio/gdbusobjectmanagerserver.c
+    ./gio/gtestdbus.c
+    ./gio/ghttpproxy.c
+    ./gio/glocalfile.c
+    ./gio/glocalfileenumerator.c
+    ./gio/glocalfileinfo.c
+    ./gio/glocalfileinputstream.c
+    ./gio/glocalfilemonitor.c
+    ./gio/glocalfileoutputstream.c
+    ./gio/glocalfileiostream.c
+    ./gio/glocalvfs.c
+    ./gio/gsocks4proxy.c
+    ./gio/gsocks4aproxy.c
+    ./gio/gsocks5proxy.c
+    ./gio/thumbnail-verify.c
+    ./gio/gdbusdaemon.c
+    ./gio/gdbus-daemon-generated.c
+    ./gio/gwin32registrykey.c
+    ./gio/gwin32mount.c
+    ./gio/gwin32volumemonitor.c
+    ./gio/gwin32inputstream.c
+    ./gio/gwin32outputstream.c
+    ./gio/gwin32appinfo.c
+    ./gio/gcontenttype-win32.c
+    ./gio/gregistrysettingsbackend.c
+    ./gio/win32/gwinhttpfile.c
+    ./gio/win32/gwinhttpfileinputstream.c
+    ./gio/win32/gwinhttpfileoutputstream.c
+    ./gio/win32/gwinhttpvfs.c
+    ./gio/win32/gwin32fsmonitorutils.c
+    ./gio/win32/gwin32filemonitor.c
+    ./gio/gvdb/gvdb-reader.c
+    ./gio/gdelayedsettingsbackend.c
+    ./gio/gkeyfilesettingsbackend.c
+    ./gio/gmemorysettingsbackend.c
+    ./gio/gnullsettingsbackend.c
+    ./gio/gsettingsbackend.c
+    ./gio/gsettingsschema.c
+    ./gio/gsettings-mapping.c
+    ./gio/gsettings.c
+)
+
 if(NOT WIN32)
     file(GLOB GIO_UNIX_SOURCES "gio/gunix*.c" "gio/g*notificationbackend.c" "gio/g*portal*.c")
     list(APPEND GIO_SOURCES ${GIO_UNIX_SOURCES})
